@@ -1,15 +1,14 @@
 from setuptools import setup
 
 setup(
-    name='lucene-querybuilder',
-    version='0.1',
+    name='lucenequerybuilder',
+    version='0.1.1',
     author='Edd Purcell',
     author_email='epurcell3@gatech.edu',
     maintainer='Matt Luongo',
     maintainer_email='mhluongo@gmail.com',
     description='A DSL to build Lucene text queries in Python.',
-    license = 'BSD',
-    url = "http://packages.python.org/lucene-querybuilder",
+    url = "http://packages.python.org/lucenequerybuilder",
     packages=['querybuilder',],
     long_description=open('README.rst').read(),
     platforms=['posix'],
