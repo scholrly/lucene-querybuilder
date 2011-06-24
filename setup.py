@@ -6,7 +6,7 @@ setup(
     author='Edd Purcell',
     author_email='epurcell3@gatech.edu',
     maintainer='Matt Luongo',
-    maintainer_email='code@scholr.ly',
+    maintainer_email='mhluongo@gmail.com',
     description='A DSL to build Lucene text queries in Python.',
     license = 'BSD',
     url = "http://packages.python.org/lucene-querybuilder",
