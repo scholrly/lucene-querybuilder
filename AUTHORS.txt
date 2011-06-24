@@ -1,0 +1,7 @@
+The PRIMARY AUTHORS are (ordered by aproximated LOC number):
+
+    * Edd Purcell <epurcell3@gatech.edu>
+
+CONTRIBUTORS:
+
+    * Matt Luongo, http://github.com/mhluongo

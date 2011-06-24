@@ -1,0 +1,4 @@
+   Copyright 2010-2011 Scholrly, Inc.
+
+   This product includes software developed by
+   Scholrly, Inc. (http://scholr.ly/).
