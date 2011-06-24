@@ -28,7 +28,7 @@ Ranges are also easy to put into a query. There are two types of range queries, 
 
   >>> q = Q(inrange=(1,5))
   
-  >>> q = Q(exrange=[egg,hgg])
+  >>> q = Q(exrange=['egg','hgg'])
 
 Ranges will work with any list-like object.
 
