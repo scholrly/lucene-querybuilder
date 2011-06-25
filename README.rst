@@ -11,7 +11,7 @@ Getting Started
 
 To use the Lucene Query Builder, you need only import it:
 
-  >>> from querybuilder import Q
+  >>> from lucenequerybuilder import Q
 
 
 Creating Queries

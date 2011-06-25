@@ -13,7 +13,7 @@ setup(
     maintainer_email='mhluongo@gmail.com',
     description='A DSL to build Lucene text queries in Python.',
     url = "http://packages.python.org/lucene-querybuilder",
-    packages=['querybuilder',],
+    packages=['lucenequerybuilder',],
     include_package_data=True,
     zip_safe=False,
     long_description=read('README.rst'),
