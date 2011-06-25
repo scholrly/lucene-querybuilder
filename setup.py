@@ -1,4 +1,8 @@
 from setuptools import setup
+import os
+
+def read(*rnames):
+        return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(
     name='lucene-querybuilder',
@@ -10,7 +14,9 @@ setup(
     description='A DSL to build Lucene text queries in Python.',
     url = "http://packages.python.org/lucene-querybuilder",
     packages=['querybuilder',],
-    long_description=open('README.rst').read(),
+    include_package_data=True,
+    zip_safe=False,
+    long_description=read('README.rst'),
     platforms=['posix'],
     tests_require=[
         'nose>=1.0',
