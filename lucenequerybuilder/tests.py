@@ -1,4 +1,4 @@
-from querybuilder import Q
+from lucenequerybuilder import Q
 
 def test_lol():
     a = 'a'
