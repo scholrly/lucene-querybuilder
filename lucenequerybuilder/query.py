@@ -35,7 +35,7 @@ class Q(object):
         if self._check_nested_fields():
             raise ValueError('No nested fields allowed.')
 
-    fielded = property(lambda self: self._has_field || self._child_has_field)
+    fielded = property(lambda self: (self._has_field or self._child_has_field))
 
     @classmethod
     def _check_whitespace(cls, s):
