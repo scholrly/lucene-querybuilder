@@ -8,7 +8,7 @@ setup(
     maintainer='Matt Luongo',
     maintainer_email='mhluongo@gmail.com',
     description='A DSL to build Lucene text queries in Python.',
-    url = "http://packages.python.org/lucenequerybuilder",
+    url = "http://packages.python.org/lucene-querybuilder",
     packages=['querybuilder',],
     long_description=open('README.rst').read(),
     platforms=['posix'],
