@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='lucenequerybuilder',
+    name='lucene-querybuilder',
     version='0.1.1',
     author='Edd Purcell',
     author_email='epurcell3@gatech.edu',
