@@ -21,12 +21,12 @@ class Q(object):
             if len(args) == 1:
                 if Q._check_whitespace(args[0]):
                     raise ValueError('No whitepsace allowed in field names.')
-                self.field = args[0]
+                self._field = args[0]
                 self._has_field = True
         elif len(args) == 2:
             if Q._check_whitespace(args[0]):
                 raise ValueError('No whitespace allowed in field names.')
-            self.field = args[0]
+            self._field = args[0]
             self._has_field = True
             if Q._check_whitespace(args[1]):
                 self.should.append('"'+args[1]+'"')
@@ -34,6 +34,8 @@ class Q(object):
                 self.should.append(args[1])
         if self._check_nested_fields():
             raise ValueError('No nested fields allowed.')
+
+    fielded = property(lambda self: self._has_field || self._child_has_field)
 
     @classmethod
     def _check_whitespace(cls, s):
@@ -87,7 +89,7 @@ class Q(object):
     def __str__(self):
         rv = ''
         if hasattr(self, 'field'):
-            rv += self.field + ':('
+            rv += self._field + ':('
         for o in self.must:
             rv += '+' +  o.__str__() + ''
         for o in self.must_not:
