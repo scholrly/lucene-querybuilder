@@ -1,5 +1,9 @@
 class Q(object):
     """ Q is a query builder for the lucene language."""
+
+    specialchars = r'+-!(){}[]^"~*?\:'
+    doublechars = '&&||'
+
     def __init__(self, *args, **kwargs):
         """
         """
@@ -10,9 +14,9 @@ class Q(object):
         self._child_has_field = False
         if len(args) == 1 and not kwargs:
             if Q._check_whitespace(args[0]):
-                self.should.append('"'+args[0]+'"')
+                self.should.append('"'+escape(args[0])+'"')
             else:
-                self.should.append(args[0])
+                self.should.append(escape(args[0]))
         elif len(args) <= 1 and kwargs:
             if kwargs.get('inrange'):
                 self.inrange = kwargs['inrange']
@@ -29,9 +33,9 @@ class Q(object):
             self.field = args[0]
             self._has_field = True
             if Q._check_whitespace(args[1]):
-                self.should.append('"'+args[1]+'"')
+                self.should.append('"'+_escape(args[1])+'"')
             else:
-                self.should.append(args[1])
+                self.should.append(_escape(args[1]))
         if self._check_nested_fields():
             raise ValueError('No nested fields allowed.')
 
@@ -40,11 +44,21 @@ class Q(object):
     @classmethod
     def _check_whitespace(cls, s):
         import string
-        if isinstance(s,basestring):
+        if isinstance(s, basestring):
             for c in string.whitespace:
                 if c in s:
                     return True
         return False
+
+    @classmethod
+    def _escape(cls, s):
+        if isinstance(s, basestring):
+            rv = ''
+            for c in s:
+                if c in specialchars:
+                    rv += '\\' + c
+                else:
+                    rv += c
 
     def _make_and(q1, q2):
         q = Q()
@@ -85,6 +99,12 @@ class Q(object):
 
     def __neg__(self):
         return Q._make_must_not(self)
+
+    def __add__(self, other):
+        return self | Q._make_must(other)
+
+    def __sub__(self, other):
+        return self | Q._make_must_not(self)
 
     def __str__(self):
         rv = ''
