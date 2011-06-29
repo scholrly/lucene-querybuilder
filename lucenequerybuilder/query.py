@@ -14,9 +14,9 @@ class Q(object):
         self._child_has_field = False
         if len(args) == 1 and not kwargs:
             if Q._check_whitespace(args[0]):
-                self.should.append('"'+escape(args[0])+'"')
+                self.should.append('"'+self._escape(args[0])+'"')
             else:
-                self.should.append(escape(args[0]))
+                self.should.append(self._escape(args[0]))
         elif len(args) <= 1 and kwargs:
             if kwargs.get('inrange'):
                 self.inrange = kwargs['inrange']
@@ -33,9 +33,9 @@ class Q(object):
             self.field = args[0]
             self._has_field = True
             if Q._check_whitespace(args[1]):
-                self.should.append('"'+_escape(args[1])+'"')
+                self.should.append('"'+self._escape(args[1])+'"')
             else:
-                self.should.append(_escape(args[1]))
+                self.should.append(self._escape(args[1]))
         if self._check_nested_fields():
             raise ValueError('No nested fields allowed.')
 
@@ -55,10 +55,12 @@ class Q(object):
         if isinstance(s, basestring):
             rv = ''
             for c in s:
-                if c in specialchars:
+                if c in cls.specialchars:
                     rv += '\\' + c
                 else:
                     rv += c
+            return rv
+        return s
 
     def _make_and(q1, q2):
         q = Q()
