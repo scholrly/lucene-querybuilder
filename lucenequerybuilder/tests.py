@@ -1,10 +1,12 @@
-<<<<<<< Updated upstream:lucenequerybuilder/tests.py
-from lucenequerybuilder import Q
-=======
-from query import Q
->>>>>>> Stashed changes:querybuilder/tests.py
+"""
+Simple tests for Q. In the future, comparing output to an actual Lucene index
+would be a good idea.
+"""
 
-def test_lol():
+from lucenequerybuilder import Q
+import re
+
+def test_general():
     a = 'a'
     b = 'b'
     c = 'c'
@@ -28,4 +30,23 @@ def test_lol():
     else:
         raise AssertionError("Shouldn't allow nested fields.")
 
-test_lol()
+def test_simple_term():
+    query_string = str(Q('a'))
+    assert query_string == 'a', query_string
+
+def test_simple_phrase():
+    query_string = str(Q('abc 123'))
+    assert query_string == '"abc 123"', query_string
+
+#this test doesn't work, but might be worth rewriting
+#
+#def test_escaping():
+#    """ Tests basic character escaping. Doesn't test double char escape, eg &&, ||."""
+#    special_lucene_chars = r'\+-!(){}[]^"~*?:'
+#    unescaped_regex = '|'.join([r'(([^\\]|^)%s)' % re.escape(c) for c in special_lucene_chars])
+#    unescaped_regex = re.compile(unescaped_regex)
+#    #test the regex
+#    assert unescaped_regex.match(r'\ [ )') is not None
+#    query_string = str(Q(':') & Q('\\'))
+#    #this won't work, dur
+#    assert not unescaped_regex.match(query_string), query_string
