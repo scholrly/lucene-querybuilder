@@ -51,7 +51,6 @@ def test_hashing():
         d[q2] = 2
     except:
         raise AssertionError('There was an error using queries as dict keys.')
-    assert d[q1] == 1, 'Got the wrong value back from the query dict!'
     assert d[q2] == 2, 'Got the wrong value back from the query dict!'
 
 

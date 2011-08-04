@@ -108,6 +108,12 @@ class Q(object):
     def __sub__(self, other):
         return self | Q._make_must_not(self)
 
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+    def __hash__(self):
+        return hash((tuple(self.should), tuple(self.must), tuple(self.must_not)))
+
     def __str__(self):
         rv = ''
         if hasattr(self, 'field'):
