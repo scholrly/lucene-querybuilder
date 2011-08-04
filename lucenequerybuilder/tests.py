@@ -4,7 +4,6 @@ would be a good idea.
 """
 
 from lucenequerybuilder import Q
-import re
 
 def test_general():
     a = 'a'
@@ -37,6 +36,24 @@ def test_simple_term():
 def test_simple_phrase():
     query_string = str(Q('abc 123'))
     assert query_string == '"abc 123"', query_string
+
+def test_hashing():
+    q1 = Q('a') & Q('b') | Q('c')
+    q2 = Q('a') & Q('b') | Q('c')
+    q3 = q1 | Q('d')
+
+    assert q1 == q2, "Queries aren't being properly evaluated for equality."
+    assert q2 != q3, "Queries aren't being properly evaluated for inequality."
+
+    d = {}
+    try:
+        d[q1] = 1
+        d[q2] = 2
+    except:
+        raise AssertionError('There was an error using queries as dict keys.')
+    assert d[q1] == 1, 'Got the wrong value back from the query dict!'
+    assert d[q2] == 2, 'Got the wrong value back from the query dict!'
+
 
 #this test doesn't work, but might be worth rewriting
 #
