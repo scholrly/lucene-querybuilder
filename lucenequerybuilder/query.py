@@ -112,7 +112,10 @@ class Q(object):
         return hash(self) == hash(other)
 
     def __hash__(self):
-        return hash((tuple(self.should), tuple(self.must), tuple(self.must_not)))
+        return hash((tuple(self.should), tuple(self.must),tuple(self.must_not),
+                     self.exrange if hasattr(self, 'exrange') else None,
+                     self.inrange if hasattr(self, 'inrange') else None,
+                     self.field if hasattr(self, 'field') else None))
 
     def __str__(self):
         rv = ''
