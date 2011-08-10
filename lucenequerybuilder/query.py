@@ -20,7 +20,7 @@ class Q(object):
         elif len(args) <= 1 and kwargs:
             if kwargs.get('inrange'):
                 self.inrange = tuple(kwargs['inrange'])
-            elif hasattr(kwargs, 'exrange'):
+            elif kwargs.get('exrange'):
                 self.exrange = tuple(kwargs['exrange'])
             if len(args) == 1:
                 if Q._check_whitespace(args[0]):
@@ -112,7 +112,10 @@ class Q(object):
         return hash(self) == hash(other)
 
     def __hash__(self):
-        return hash((tuple(self.should), tuple(self.must), tuple(self.must_not)))
+        return hash((tuple(self.should), tuple(self.must),tuple(self.must_not),
+                     self.exrange if hasattr(self, 'exrange') else None,
+                     self.inrange if hasattr(self, 'inrange') else None,
+                     self.field if hasattr(self, 'field') else None))
 
     def __str__(self):
         rv = ''
@@ -138,7 +141,7 @@ class Q(object):
         if hasattr(self, 'inrange'):
             rv += '[' + str(self.inrange[0]) + ' TO ' + str(self.inrange[1]) + ']'
         if hasattr(self, 'exrange'):
-            rv += '{' + str(self.exrange[0]) + ' TO ' + str(self.exrange[1]) + ']'
+            rv += '{' + str(self.exrange[0]) + ' TO ' + str(self.exrange[1]) + '}'
         if hasattr(self, 'field'):
             rv += ')'
         return rv
