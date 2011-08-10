@@ -19,9 +19,9 @@ class Q(object):
                 self.should.append(self._escape(args[0]))
         elif len(args) <= 1 and kwargs:
             if kwargs.get('inrange'):
-                self.inrange = kwargs['inrange']
+                self.inrange = tuple(kwargs['inrange'])
             elif hasattr(kwargs, 'exrange'):
-                self.exrange = kwargs['exrange']
+                self.exrange = tuple(kwargs['exrange'])
             if len(args) == 1:
                 if Q._check_whitespace(args[0]):
                     raise ValueError('No whitepsace allowed in field names.')
