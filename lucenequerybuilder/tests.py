@@ -4,6 +4,7 @@ would be a good idea.
 """
 
 from lucenequerybuilder import Q
+from nose.tools import eq_
 
 def test_general():
     a = 'a'
@@ -73,7 +74,7 @@ def test_field_restrictions():
         raise AssertionError('Query allowed nested fields, which are invalid.')
 
 def test_fuzzy():
-    assert str(Q(fuzzy='fuzzi')) == 'fuzzi~'
+    eq_(str(Q(fuzzy='fuzzi')), 'fuzzi~')
 
     try:
         Q(fuzzy='test fuzz')
@@ -82,5 +83,5 @@ def test_fuzzy():
     else:
         raise AssertionError("Fuzzy queries shouldn't have whitespace.")
 
-    assert str(Q(fuzzy=('fuzzi', .2))) == 'fuzzi~.2'
-    assert str(Q('field', fuzzy='fuzzi')) == 'field:(fuzzi~)'
+    eq_(str(Q(fuzzy=('fuzzi', .2))), 'fuzzi~0.200')
+    eq_(str(Q('field', fuzzy='fuzzi')), 'field:(fuzzi~)')

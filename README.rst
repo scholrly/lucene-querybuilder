@@ -85,9 +85,29 @@ The following examples are invalid queries which will raise an error::
   
   >>> q = Q('bad', Q('range', inrange=[10, 9001]))
 
+Fuzzy Queries
+-------------
 
-Boosting, Wildcards and Fuzzy Queries
---------------------------------------
+A fuzzy term query can be accomplished using the fuzzy keyword::
+
+  >>> q = Q('name', fuzzy=('edd', .2))
+  
+  >>> str(q)
+
+  'name:(edd~0.200)'
+
+The first element in the fuzzy tuple is the term, and the second is the similarity ratio- a float, str, or decimal between 0 and 1.
+
+If you drop the second element, and just provide a str, the string will signify to use Lucene's default ratio - 0.5::
+
+  >>> q = Q('name', fuzzy='edd')
+  
+  >>> str(q)
+
+  'name:(edd~)'
+
+Boosting & Wildcard Queries
+---------------------------
 
 These queries are not yet supported, but will be soon. Feel free to add support yourself and request a pull!
 

@@ -46,14 +46,18 @@ class Q(object):
                     raise ValueError('Only one option - fuzzy, exrange, '
                                      'wildcard, or inrange - is valid.')
                 fuzzy = kwargs['fuzzy']
+                if Q._check_whitespace(fuzzy):
+                    raise ValueError('No whitespace allowed in fuzzy queries.')
                 if isinstance(fuzzy, basestring):
-                    self.fuzzy = (fuzzy, .5)
+                    self.fuzzy = (fuzzy, None)
                 elif hasattr(fuzzy, '__iter__') and len(fuzzy) == 2\
-                        and isinstance(fuzzy[1], float):
+                        and 0 <= float(fuzzy[1]) <= 1:
                     self.fuzzy = tuple(fuzzy)
                 else:
                     raise ValueError('fuzzy should be a string or two element '
-                                     'term/similarity ratio sequence.')
+                                     'term/similarity ratio sequence. The '
+                                     'ratio, cast to float,  should be between'
+                                     ' 0 and 1.')
             if len(args) == 1:
                 if Q._check_whitespace(args[0]):
                     raise ValueError('No whitespace allowed in field names.')
@@ -177,6 +181,10 @@ class Q(object):
             rv = '[' + str(self.inrange[0]) + ' TO ' + str(self.inrange[1]) + ']'
         elif self.exrange is not None:
             rv = '{' + str(self.exrange[0]) + ' TO ' + str(self.exrange[1]) + '}'
+        elif self.fuzzy:
+            rv = '{0!s}~'.format(self.fuzzy[0])
+            if self.fuzzy[1] is not None:
+                rv += '{0:.3f}'.format(self.fuzzy[1])
         else:
             rv = ''
             for o in self.must:
@@ -189,37 +197,3 @@ class Q(object):
         if self.field is not None:
             rv = '{0}:({1})'.format(self.field, rv)
         return rv
-
-    def _check_nested_fields(self):
-        stack = []
-        stack.extend(self.must)
-        stack.extend(self.must_not)
-        stack.extend(self.should)
-        if hasattr(self, '_and'):
-            stack.extend(self._and)
-        if hasattr(self, '_not'):
-            stack.append(self._not)
-        if hasattr(self, '_or'):
-            stack.extend(self._or)
-        while stack:
-            o = stack.pop()
-            if not isinstance(o, Q):
-                continue
-            if hasattr(o, 'field') or o._child_has_field:
-                self._child_has_field = True
-                if self._has_field:
-                    return True
-            else:
-                stack.extend(o.must)
-                stack.extend(o.must_not)
-                stack.extend(o.should)
-                if hasattr(o, '_and'):
-                    stack.extend(o._and)
-                if hasattr(o, '_not'):
-                    stack.append(o._not)
-                if hasattr(o, '_or'):
-                    stack.extend(o._or)
-        return False
-           
-    #probably dfs here, build a flag tree as you go so dfs won't be run 100 times
-
