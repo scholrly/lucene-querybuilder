@@ -15,7 +15,7 @@ def test_general():
     g = 1
     h = 5
     q1 = Q(a) | Q(b)
-    assert str(q1) == '('+a+' OR '+b+')'
+    assert str(q1) == '('+a+' OR '+b+')', str(q1)
     q2 = Q(c) & q1
     assert str(q2) == '('+c+' AND ('+a+' OR '+b+'))'
     q3 = +Q(a) +Q(b) | Q(f, Q(c) & ~Q(Q(d) | Q(e)))

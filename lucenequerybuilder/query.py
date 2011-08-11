@@ -10,13 +10,23 @@ class Q(object):
         self.must = []
         self.must_not = []
         self.should = []
-        self._has_field = False
+        self._and = None
+        self._or = None
+        self._not = None
+        self.inrange = None
+        self.exrange = None
         self._child_has_field = False
+        self.field = None
         if len(args) == 1 and not kwargs:
-            if Q._check_whitespace(args[0]):
-                self.should.append('"'+self._escape(args[0])+'"')
+            if isinstance(args[0], Q):
+                if args[0].fielded:
+                    self._child_has_field = True
+                self.should.append(args[0])
             else:
-                self.should.append(self._escape(args[0]))
+                if Q._check_whitespace(args[0]):
+                    self.should.append('"'+self._escape(args[0])+'"')
+                else:
+                    self.should.append(self._escape(args[0]))
         elif len(args) <= 1 and kwargs:
             if kwargs.get('inrange'):
                 self.inrange = tuple(kwargs['inrange'])
@@ -26,20 +36,33 @@ class Q(object):
                 if Q._check_whitespace(args[0]):
                     raise ValueError('No whitepsace allowed in field names.')
                 self.field = args[0]
-                self._has_field = True
         elif len(args) == 2:
             if Q._check_whitespace(args[0]):
                 raise ValueError('No whitespace allowed in field names.')
             self.field = args[0]
-            self._has_field = True
-            if Q._check_whitespace(args[1]):
-                self.should.append('"'+self._escape(args[1])+'"')
+            if isinstance(args[1], Q):
+                if args[1].fielded:
+                    raise ValueError('No nested fields allowed.')
+                self.should.append(args[1])
             else:
-                self.should.append(self._escape(args[1]))
-        if self._check_nested_fields():
-            raise ValueError('No nested fields allowed.')
+                if Q._check_whitespace(args[1]):
+                    self.should.append('"'+self._escape(args[1])+'"')
+                else:
+                    self.should.append(self._escape(args[1]))
 
-    fielded = property(lambda self: (self._has_field or self._child_has_field))
+    @property
+    def fielded(self):
+        return self.field is not None or\
+                any(Q._has_field(l) for l in [self.must, self.must_not,
+                                              self.should, self._and, self._or,
+                                              self._not])
+    @staticmethod
+    def _has_field(val):
+        if hasattr(val, '__iter__'):
+            return any(Q._has_field(t) for t in val)
+        else:
+            return hasattr(val, 'field') and val.field is not None
+
 
     @classmethod
     def _check_whitespace(cls, s):
@@ -64,17 +87,17 @@ class Q(object):
 
     def _make_and(q1, q2):
         q = Q()
-        setattr(q, '_and', (q1, q2))
+        q._and = (q1, q2)
         return q
 
     def _make_not(q1):
         q = Q()
-        setattr(q, '_not', q1)
+        q._not = q1
         return q
 
     def _make_or(q1, q2):
         q = Q()
-        setattr(q, '_or', (q1, q2))
+        q._or = (q1, q2)
         return q
 
     def _make_must(q1):
@@ -113,37 +136,33 @@ class Q(object):
 
     def __hash__(self):
         return hash((tuple(self.should), tuple(self.must),tuple(self.must_not),
-                     self.exrange if hasattr(self, 'exrange') else None,
-                     self.inrange if hasattr(self, 'inrange') else None,
-                     self.field if hasattr(self, 'field') else None))
+                     self.exrange, self.inrange, self.field))
 
     def __str__(self):
         rv = ''
-        if hasattr(self, 'field'):
-            rv += self.field + ':('
         for o in self.must:
-            rv += '+' +  o.__str__() + ''
+            rv += '+' + str(o)
         for o in self.must_not:
-            rv += '-' + o.__str__() + ''
+            rv += str(o)
         for o in self.should:
-            rv += '' + o.__str__() + ''
-        if hasattr(self, '_and'):
+            rv += str(o)
+        if self._and is not None:
             rv += '(' + str(self._and[0]) + ' AND ' + str(self._and[1]) + ')'
-        if hasattr(self, '_not'):
+        if self._not is not None:
             rv += 'NOT ' + str(self._not)
-        if hasattr(self, '_or'):
-            if hasattr(self._or[0], 'field') or hasattr(self._or[1],
-                        'field') or self._or[0].must or self._or[1].must\
-                         or self._or[0].must_not or self._or[1].must_not:
+        if self._or is not None:
+            if self._or[0].field is not None or self._or[1].field is not None\
+               or self._or[0].must or self._or[1].must or self._or[0].must_not\
+               or self._or[1].must_not:
                 rv += str(self._or[0]) + ' ' + str(self._or[1])
             else:
                 rv += '(' + str(self._or[0]) + ' OR ' + str(self._or[1]) + ')'
-        if hasattr(self, 'inrange'):
+        if self.inrange is not None:
             rv += '[' + str(self.inrange[0]) + ' TO ' + str(self.inrange[1]) + ']'
-        if hasattr(self, 'exrange'):
+        if self.exrange is not None:
             rv += '{' + str(self.exrange[0]) + ' TO ' + str(self.exrange[1]) + '}'
-        if hasattr(self, 'field'):
-            rv += ')'
+        if self.field is not None:
+            rv = '{0}:({1})'.format(self.field, rv)
         return rv
 
     def _check_nested_fields(self):
