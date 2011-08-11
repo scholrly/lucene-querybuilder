@@ -53,16 +53,21 @@ def test_hashing():
         raise AssertionError('There was an error using queries as dict keys.')
     assert d[q2] == 2, 'Got the wrong value back from the query dict!'
 
+    q4 = Q('field', inrange=(1,2))
+    q5 = Q('field', inrange=(1,3))
+    assert q4 != q5
+    assert hash(q4) != hash(q5)
 
-#this test doesn't work, but might be worth rewriting
-#
-#def test_escaping():
-#    """ Tests basic character escaping. Doesn't test double char escape, eg &&, ||."""
-#    special_lucene_chars = r'\+-!(){}[]^"~*?:'
-#    unescaped_regex = '|'.join([r'(([^\\]|^)%s)' % re.escape(c) for c in special_lucene_chars])
-#    unescaped_regex = re.compile(unescaped_regex)
-#    #test the regex
-#    assert unescaped_regex.match(r'\ [ )') is not None
-#    query_string = str(Q(':') & Q('\\'))
-#    #this won't work, dur
-#    assert not unescaped_regex.match(query_string), query_string
+def test_field_restrictions():
+    q1 = Q('field', 'test query')
+    assert q1.fielded
+
+    q2 = Q('a') & q1
+    assert q2.fielded
+
+    try:
+        Q('another_field', q2)
+    except:
+        pass
+    else:
+        raise AssertionError('Query allowed nested fields, which are invalid.')
