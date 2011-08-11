@@ -15,7 +15,7 @@ class Q(object):
         self._not = None
         self.inrange = None
         self.exrange = None
-        self._child_has_field = False
+        self.fuzzy = None
         self.field = None
         if len(args) == 1 and not kwargs:
             if isinstance(args[0], Q):
@@ -29,12 +29,34 @@ class Q(object):
                     self.should.append(self._escape(args[0]))
         elif len(args) <= 1 and kwargs:
             if kwargs.get('inrange'):
+                if kwargs.get('exrange') or kwargs.get('fuzzy')\
+                   or kwargs.get('wildcard'):
+                    raise ValueError('Only one option - fuzzy, exrange, '
+                                     'wildcard, or inrange - is valid.')
                 self.inrange = tuple(kwargs['inrange'])
             elif kwargs.get('exrange'):
+                if kwargs.get('inrange') or kwargs.get('fuzzy')\
+                   or kwargs.get('wildcard'):
+                    raise ValueError('Only one option - fuzzy, exrange, '
+                                     'wildcard, or inrange - is valid.')
                 self.exrange = tuple(kwargs['exrange'])
+            elif kwargs.get('fuzzy'):
+                if kwargs.get('inrange') or kwargs.get('exrange')\
+                   or kwargs.get('wildcard'):
+                    raise ValueError('Only one option - fuzzy, exrange, '
+                                     'wildcard, or inrange - is valid.')
+                fuzzy = kwargs['fuzzy']
+                if isinstance(fuzzy, basestring):
+                    self.fuzzy = (fuzzy, .5)
+                elif hasattr(fuzzy, '__iter__') and len(fuzzy) == 2\
+                        and isinstance(fuzzy[1], float):
+                    self.fuzzy = tuple(fuzzy)
+                else:
+                    raise ValueError('fuzzy should be a string or two element '
+                                     'term/similarity ratio sequence.')
             if len(args) == 1:
                 if Q._check_whitespace(args[0]):
-                    raise ValueError('No whitepsace allowed in field names.')
+                    raise ValueError('No whitespace allowed in field names.')
                 self.field = args[0]
         elif len(args) == 2:
             if Q._check_whitespace(args[0]):
@@ -52,6 +74,7 @@ class Q(object):
 
     @property
     def fielded(self):
+        """Returns whether any part of the query has a field."""
         return self.field is not None or\
                 any(Q._has_field(l) for l in [self.must, self.must_not,
                                               self.should, self._and, self._or,
@@ -136,31 +159,33 @@ class Q(object):
 
     def __hash__(self):
         return hash((tuple(self.should), tuple(self.must),tuple(self.must_not),
-                     self.exrange, self.inrange, self.field))
+                     self.exrange, self.inrange, self.field, self.fuzzy))
 
     def __str__(self):
-        rv = ''
-        for o in self.must:
-            rv += '+' + str(o)
-        for o in self.must_not:
-            rv += str(o)
-        for o in self.should:
-            rv += str(o)
         if self._and is not None:
-            rv += '(' + str(self._and[0]) + ' AND ' + str(self._and[1]) + ')'
-        if self._not is not None:
-            rv += 'NOT ' + str(self._not)
-        if self._or is not None:
+            rv = '(' + str(self._and[0]) + ' AND ' + str(self._and[1]) + ')'
+        elif self._not is not None:
+            rv = 'NOT ' + str(self._not)
+        elif self._or is not None:
             if self._or[0].field is not None or self._or[1].field is not None\
                or self._or[0].must or self._or[1].must or self._or[0].must_not\
                or self._or[1].must_not:
-                rv += str(self._or[0]) + ' ' + str(self._or[1])
+                rv = str(self._or[0]) + ' ' + str(self._or[1])
             else:
-                rv += '(' + str(self._or[0]) + ' OR ' + str(self._or[1]) + ')'
-        if self.inrange is not None:
-            rv += '[' + str(self.inrange[0]) + ' TO ' + str(self.inrange[1]) + ']'
-        if self.exrange is not None:
-            rv += '{' + str(self.exrange[0]) + ' TO ' + str(self.exrange[1]) + '}'
+                rv = '(' + str(self._or[0]) + ' OR ' + str(self._or[1]) + ')'
+        elif self.inrange is not None:
+            rv = '[' + str(self.inrange[0]) + ' TO ' + str(self.inrange[1]) + ']'
+        elif self.exrange is not None:
+            rv = '{' + str(self.exrange[0]) + ' TO ' + str(self.exrange[1]) + '}'
+        else:
+            rv = ''
+            for o in self.must:
+                rv += '+' + str(o)
+            for o in self.must_not:
+                rv += str(o)
+            for o in self.should:
+                rv += str(o)
+
         if self.field is not None:
             rv = '{0}:({1})'.format(self.field, rv)
         return rv
