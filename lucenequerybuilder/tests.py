@@ -71,3 +71,16 @@ def test_field_restrictions():
         pass
     else:
         raise AssertionError('Query allowed nested fields, which are invalid.')
+
+def test_fuzzy():
+    assert str(Q(fuzzy='fuzzi')) == 'fuzzi~'
+
+    try:
+        Q(fuzzy='test fuzz')
+    except:
+        pass
+    else:
+        raise AssertionError("Fuzzy queries shouldn't have whitespace.")
+
+    assert str(Q(fuzzy=('fuzzi', .2))) == 'fuzzi~.2'
+    assert str(Q('field', fuzzy='fuzzi')) == 'field:(fuzzi~)'
