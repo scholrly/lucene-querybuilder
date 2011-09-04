@@ -18,9 +18,9 @@ class Q(object):
         self.fuzzy = None
         self.field = None
         self.allow_wildcard=False
+        if 'wildcard' in kwargs:
+            self.allow_wildcard = kwargs['wildcard']
         if len(args) == 1 and (not kwargs or kwargs.keys()==['wildcard']):
-            if 'wildcard' in kwargs:
-                self.allow_wildcard = kwargs['wildcard']
             if isinstance(args[0], Q):
                 if args[0].fielded:
                     self._child_has_field = True

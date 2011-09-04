@@ -89,3 +89,4 @@ def test_fuzzy():
 def test_wildcard():
     eq_(str(Q('lol*', wildcard=True)), 'lol*')
     eq_(str(Q('field_with_*', 'some query')), 'field_with_*:("some query")')
+    eq_(str(Q('field_with_*', 'some*query', wildcard=True)), 'field_with_*:(some*query)')

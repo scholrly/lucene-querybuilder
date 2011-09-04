@@ -1,0 +1,12 @@
+options={
+	}
+tests=[
+	'test_general',
+	'test_simple_term',
+	'test_simple_phrase',
+	'test_hashing',
+	'test_field_restrictions',
+	'test_fuzzy',
+	'test_wildcard']
+should_fail=[
+	'test_wildcard']
