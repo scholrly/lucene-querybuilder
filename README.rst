@@ -106,6 +106,17 @@ If you drop the second element, and just provide a str, the string will signify 
 
   'name:(edd~)'
 
+Wildcard Queries
+----------------
+
+To keep wildcard queries from having '?' and '*' from being escaped, simple include the wildcard flag::
+
+  >>> str(Q('c?t', wildcard=True))
+
+  'c?t'
+
+which will match 'cat' or 'cot'.
+
 Boosting & Wildcard Queries
 ---------------------------
 

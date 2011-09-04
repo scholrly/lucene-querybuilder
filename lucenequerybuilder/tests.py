@@ -85,3 +85,7 @@ def test_fuzzy():
 
     eq_(str(Q(fuzzy=('fuzzi', .2))), 'fuzzi~0.200')
     eq_(str(Q('field', fuzzy='fuzzi')), 'field:(fuzzi~)')
+
+def test_wildcard():
+    eq_(str(Q('lol*', wildcard=True)), 'lol*')
+    eq_(str(Q('field_with_*', 'some query')), 'field_with_*:("some query")')

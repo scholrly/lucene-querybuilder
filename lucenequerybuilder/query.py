@@ -17,7 +17,10 @@ class Q(object):
         self.exrange = None
         self.fuzzy = None
         self.field = None
-        if len(args) == 1 and not kwargs:
+        self.allow_wildcard=False
+        if len(args) == 1 and (not kwargs or kwargs.keys()==['wildcard']):
+            if 'wildcard' in kwargs:
+                self.allow_wildcard = kwargs['wildcard']
             if isinstance(args[0], Q):
                 if args[0].fielded:
                     self._child_has_field = True
@@ -28,23 +31,14 @@ class Q(object):
                 else:
                     self.should.append(self._escape(args[0]))
         elif len(args) <= 1 and kwargs:
+            if len(kwargs) > 1:
+                raise ValueError('Only one other clause - fuzzy, exrange, or '
+                                 'inrange - is valid.')
             if kwargs.get('inrange'):
-                if kwargs.get('exrange') or kwargs.get('fuzzy')\
-                   or kwargs.get('wildcard'):
-                    raise ValueError('Only one option - fuzzy, exrange, '
-                                     'wildcard, or inrange - is valid.')
                 self.inrange = tuple(kwargs['inrange'])
             elif kwargs.get('exrange'):
-                if kwargs.get('inrange') or kwargs.get('fuzzy')\
-                   or kwargs.get('wildcard'):
-                    raise ValueError('Only one option - fuzzy, exrange, '
-                                     'wildcard, or inrange - is valid.')
                 self.exrange = tuple(kwargs['exrange'])
             elif kwargs.get('fuzzy'):
-                if kwargs.get('inrange') or kwargs.get('exrange')\
-                   or kwargs.get('wildcard'):
-                    raise ValueError('Only one option - fuzzy, exrange, '
-                                     'wildcard, or inrange - is valid.')
                 fuzzy = kwargs['fuzzy']
                 if Q._check_whitespace(fuzzy):
                     raise ValueError('No whitespace allowed in fuzzy queries.')
@@ -100,12 +94,13 @@ class Q(object):
                     return True
         return False
 
-    @classmethod
-    def _escape(cls, s):
+    def _escape(self, s):
         if isinstance(s, basestring):
             rv = ''
+            specialchars = self.specialchars.translate(None,'*?')\
+                    if self.allow_wildcard else self.specialchars
             for c in s:
-                if c in cls.specialchars:
+                if c in specialchars:
                     rv += '\\' + c
                 else:
                     rv += c
