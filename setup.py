@@ -6,7 +6,7 @@ def read(*rnames):
 
 setup(
     name='lucene-querybuilder',
-    version='0.1.4',
+    version='0.1.5',
     author='Edd Purcell',
     author_email='epurcell3@gatech.edu',
     maintainer='Matt Luongo',
@@ -20,6 +20,7 @@ setup(
     platforms=['posix'],
     tests_require=[
         'nose>=1.0',
+        'nose-regression==1.0',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
