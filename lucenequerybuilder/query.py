@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+
 class Q(object):
     """ Q is a query builder for the lucene language."""
 
@@ -191,4 +194,38 @@ class Q(object):
 
         if self.field is not None:
             rv = '{0}:({1})'.format(self.field, rv)
+        return rv
+
+
+    def __unicode__(self):
+        if self._and is not None:
+            rv = u'(' + unicode(self._and[0]) + u' AND ' + unicode(self._and[1]) + u')'
+        elif self._not is not None:
+            rv = u'NOT ' + unicode(self._not)
+        elif self._or is not None:
+            if self._or[0].field is not None or self._or[1].field is not None\
+               or self._or[0].must or self._or[1].must or self._or[0].must_not\
+               or self._or[1].must_not:
+                rv = unicode(self._or[0]) + u' ' + unicode(self._or[1])
+            else:
+                rv = u'(' + unicode(self._or[0]) + u' OR ' + unicode(self._or[1]) + u')'
+        elif self.inrange is not None:
+            rv = u'[' + unicode(self.inrange[0]) + u' TO ' + unicode(self.inrange[1]) + u']'
+        elif self.exrange is not None:
+            rv = u'{' + unicode(self.exrange[0]) + u' TO ' + unicode(self.exrange[1]) + u'}'
+        elif self.fuzzy:
+            rv = u'{0!s}~'.format(self.fuzzy[0])
+            if self.fuzzy[1] is not None:
+                rv += u'{0:.3f}'.format(self.fuzzy[1])
+        else:
+            rv = u''
+            for o in self.must:
+                rv += u'+' + unicode(o)
+            for o in self.must_not:
+                rv += unicode(o)
+            for o in self.should:
+                rv += unicode(o)
+
+        if self.field is not None:
+            rv = u'{0}:({1})'.format(self.field, rv)
         return rv
