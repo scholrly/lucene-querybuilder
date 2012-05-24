@@ -180,9 +180,16 @@ class Q(object):
         elif self.exrange is not None:
             rv = '{' + str(self.exrange[0]) + ' TO ' + str(self.exrange[1]) + '}'
         elif self.fuzzy:
-            rv = '{0!s}~'.format(self.fuzzy[0])
+            try:
+                rv = '{0!s}~'.format(self.fuzzy[0])
+            except AttributeError:
+                rv = '%s~' % self.fuzzy[0]
             if self.fuzzy[1] is not None:
-                rv += '{0:.3f}'.format(self.fuzzy[1])
+                try:
+                    rv += '{0:.3f}'.format(self.fuzzy[1])
+                except AttributeError:
+                    rv += '%.3f' % self.fuzzy[1]
+
         else:
             rv = ''
             for o in self.must:
@@ -193,7 +200,10 @@ class Q(object):
                 rv += str(o)
 
         if self.field is not None:
-            rv = '{0}:({1})'.format(self.field, rv)
+            try:
+                rv = '{0}:({1})'.format(self.field, rv)
+            except AttributeError:
+                rv = '%s:(%s)' % (self.field, rv)
         return rv
 
 
@@ -214,9 +224,15 @@ class Q(object):
         elif self.exrange is not None:
             rv = u'{' + unicode(self.exrange[0]) + u' TO ' + unicode(self.exrange[1]) + u'}'
         elif self.fuzzy:
-            rv = u'{0!s}~'.format(self.fuzzy[0])
+            try:
+                rv = u'{0!s}~'.format(self.fuzzy[0])
+            except AttributeError:
+                rv = u'%s~' % self.fuzzy[0]
             if self.fuzzy[1] is not None:
-                rv += u'{0:.3f}'.format(self.fuzzy[1])
+                try:
+                    rv += '{0:.3f}'.format(self.fuzzy[1])
+                except AttributeError:
+                    rv += '%.3f' % self.fuzzy[1]
         else:
             rv = u''
             for o in self.must:
@@ -227,5 +243,8 @@ class Q(object):
                 rv += unicode(o)
 
         if self.field is not None:
-            rv = u'{0}:({1})'.format(self.field, rv)
+            try:
+                rv = u'{0}:({1})'.format(self.field, rv)
+            except AttributeError:
+                rv = u'%s:(%s)' % (self.field, rv)
         return rv
