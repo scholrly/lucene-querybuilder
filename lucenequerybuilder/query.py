@@ -104,8 +104,15 @@ class Q(object):
     def _escape(self, s):
         if isinstance(s, basestring):
             rv = ''
-            specialchars = self.specialchars.translate(None,'*?')\
-                    if self.allow_wildcard else self.specialchars
+            if self.allow_wildcard:
+                if sys.version_info > (3, 0):
+                    trans_table = str.maketrans("", "", "*?")
+                    specialchars = self.specialchars.translate(trans_table)
+                else:
+                    specialchars = self.specialchars.translate(None,'*?')
+            else:
+                specialchars = self.specialchars
+
             for c in s:
                 if c in specialchars:
                     rv += '\\' + c
