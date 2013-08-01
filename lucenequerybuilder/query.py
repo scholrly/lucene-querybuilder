@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import sys
+
+if sys.version_info > (3, 0):
+    basestring = str
 
 
 class Q(object):
@@ -23,7 +27,7 @@ class Q(object):
         self.allow_wildcard=False
         if 'wildcard' in kwargs:
             self.allow_wildcard = kwargs['wildcard']
-        if len(args) == 1 and (not kwargs or kwargs.keys()==['wildcard']):
+        if len(args) == 1 and (not kwargs or list(kwargs.keys())==['wildcard']):
             if isinstance(args[0], Q):
                 if args[0].fielded:
                     self._child_has_field = True
@@ -100,8 +104,15 @@ class Q(object):
     def _escape(self, s):
         if isinstance(s, basestring):
             rv = ''
-            specialchars = self.specialchars.translate(None,'*?')\
-                    if self.allow_wildcard else self.specialchars
+            if self.allow_wildcard:
+                if sys.version_info > (3, 0):
+                    trans_table = str.maketrans("", "", "*?")
+                    specialchars = self.specialchars.translate(trans_table)
+                else:
+                    specialchars = self.specialchars.translate(None,'*?')
+            else:
+                specialchars = self.specialchars
+
             for c in s:
                 if c in specialchars:
                     rv += '\\' + c
