@@ -1,15 +1,14 @@
 Lucene Query Builder
 ====================
 
-:synopsis: Allows creation of Lucene queries without needing to know the language well in Python.
+:synopsis: A Python DSL for Lucene queries.
 
-The objective is to be able to quickly create multiple lucene query strings easily without having to learn the language itself. The syntax is simple to use and allows creating larger queries from multiple smaller ones. A basic lesson on proper Lucene queries can be found here_.
+Easily create Lucene query strings without having to learn the language itself. The syntax is simple to use and allows creating larger queries from multiple smaller ones. A basic lesson on proper Lucene queries can be found here_.
 
+Supports Python 2.6+.
 
 Getting Started
 ---------------
-
-To use the Lucene Query Builder, you need only import it:
 
   >>> from lucenequerybuilder import Q
 
