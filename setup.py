@@ -6,7 +6,7 @@ def read(*rnames):
 
 setup(
     name='lucene-querybuilder',
-    version='0.1.6',
+    version='0.2',
     author='Edd Purcell',
     author_email='epurcell3@gatech.edu',
     maintainer='Matt Luongo',
