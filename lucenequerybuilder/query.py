@@ -23,6 +23,7 @@ class Q(object):
         self.inrange = None
         self.exrange = None
         self.fuzzy = None
+        self.proximity = None
         self.field = None
         self.allow_wildcard=False
         if 'wildcard' in kwargs:
@@ -59,6 +60,18 @@ class Q(object):
                                      'term/similarity ratio sequence. The '
                                      'ratio, cast to float,  should be between'
                                      ' 0 and 1.')
+            elif kwargs.get('proximity'):
+                proximity = kwargs['proximity']
+                if isinstance(proximity, basestring):
+                    self.proximity = (proximity, 1)
+                elif hasattr(proximity, '__iter__') and len(proximity) == 2\
+                        and int(proximity[1]) >= 0:
+                    self.proximity = tuple(proximity)
+                else:
+                    raise ValueError('proximity should be a string or two element '
+                                     'term/proximity sequence. The '
+                                     'proximity, cast to int,  should be '
+                                     'non-negative.')
             if len(args) == 1:
                 if Q._check_whitespace(args[0]):
                     raise ValueError('No whitespace allowed in field names.')
@@ -172,7 +185,7 @@ class Q(object):
 
     def __hash__(self):
         return hash((tuple(self.should), tuple(self.must),tuple(self.must_not),
-                     self.exrange, self.inrange, self.field, self.fuzzy))
+                     self.exrange, self.inrange, self.field, self.fuzzy, self.proximity))
 
     def __str__(self):
         if self._and is not None:
@@ -200,6 +213,11 @@ class Q(object):
                     rv += '{0:.3f}'.format(self.fuzzy[1])
                 except AttributeError:
                     rv += '%.3f' % self.fuzzy[1]
+        elif self.proximity:
+            try:
+                rv = '"{:s}"~{:d}'.format(self._escape(self.proximity[0]), self.proximity[1])
+            except AttributeError:
+                rv = '"%s"~%d' % (self._escape(self.proximity[0]), self.proximity[1])
 
         else:
             rv = ''
@@ -244,6 +262,12 @@ class Q(object):
                     rv += '{0:.3f}'.format(self.fuzzy[1])
                 except AttributeError:
                     rv += '%.3f' % self.fuzzy[1]
+        elif self.proximity:
+            try:
+                rv = u'"{:s}"~{:d}'.format(self._escape(self.proximity[0]), self.proximity[1])
+            except AttributeError:
+                rv = u'"%s"~%d' % (self._escape(self.proximity[0]), self.proximity[1])
+
         else:
             rv = u''
             for o in self.must:
